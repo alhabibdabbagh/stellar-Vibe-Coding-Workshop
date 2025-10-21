@@ -1,3 +1,48 @@
+# 📦 Program Submission Pack
+
+This top section was added to align with the program’s rubric and prompt flow. It includes the requested “About Me”, short project description, vision, development plan, personal story, install snippet, and the ImgCreator prompt. You can copy this block into your submission form as-is, or edit the placeholders under About Me.
+
+## 🧑‍💻 About Me
+- Name: <adını yaz>
+- Rol/ilgi alanı: <ör. Full‑stack geliştirici / Blockchain meraklısı>
+- Odak: <ör. Web3, Soroban, UX>
+- Kısa hedef: <ör. Soroban öğrenmek ve üretime hazır DApp’ler çıkarmak>
+- İletişim: <GitHub/Twitter/LinkedIn linkin>
+
+## 📜 Project name
+MicroWallet — Stellar Soroban DApp
+
+## ⚡ Project description (≤150 words)
+MicroWallet is a simple, fast, and secure Stellar Soroban DApp that lets users connect their Freighter wallet, fund a test account, and interact with a smart contract to deposit and withdraw XLM. It demonstrates end‑to‑end Web3 patterns: wallet connection, Soroban RPC invocation, transaction simulation/assembly, signing with Freighter, and result polling. The UI is built with Next.js + React + Tailwind for a clean experience with toast notifications, live balance, and a recent payments view from Horizon. The app supports runtime configuration (RPC URL and contract ID) via local storage so it can be reused with different deployments. It’s designed as a learning-friendly yet practical template that can be extended with tokens and more complex logic.
+
+## 🌍 Vision (≤100 words)
+Our vision is to make Soroban development approachable and production‑ready for everyone. MicroWallet lowers the barrier to entry by packaging the essential building blocks—wallet connect, contract calls, and clear UX—into a reusable template. Educators can teach with it, builders can fork it, and teams can extend it into real products. As more people learn and ship on Stellar, we collectively expand financial access and interoperability.
+
+## 🧭 Software development plan (≤6 steps)
+1) Smart contract: define functions `get_balance(user) -> i128`, `deposit(user, amount)`, `withdraw(user, amount)` with storage mapping balances and proper error handling.
+2) RPC integration: simulate and assemble Soroban transactions; poll results; map ScVals.
+3) Wallet: Freighter connect + transaction signing using network + passphrase.
+4) Frontend: Next.js pages for connect (/, fund), main (balance, deposit/withdraw), settings and payments history.
+5) Quality: TypeScript, toasts, tests (Vitest), CI workflow, README, .env.example.
+6) Deployment: Vercel (or Node server) with TESTNET config; rotate to PUBLIC when ready.
+
+## 🧩 Personal story (≤100 words)
+I wanted a hands‑on way to learn Soroban and help others do the same. Building MicroWallet taught me how wallet flows, transaction simulation, and contract calls fit together. I focused on clarity, good UX, and reusability so new developers can start fast and teams can adapt it for real needs.
+
+## 🧪 Install (draft)
+```bash
+git clone https://github.com/alhabibdabbagh/stellar-Vibe-Coding-Workshop.git
+cd stellar-Vibe-Coding-Workshop
+npm install
+cp .env.example .env   # EDIT contract id if you deploy your own
+npm run dev             # open http://localhost:3000
+```
+
+## 🎨 ImgCreator prompt
+futuristic happy digital painting with a MASCOT (bull) hero in a happy, bright futuristic SETTING (city), KEYWORDS (creating abundance, exploring new frontiers, friendly, inviting, vibrant colors)
+
+Place the generated image at the top of this README (e.g., in `/public/` and reference it with `![Logo](public/mascot.png)`).
+
 # 🌟 MicroWallet - Stellar Soroban DApp
 
 A decentralized wallet application built on the **Stellar blockchain** using **Soroban smart contracts**. This project demonstrates how to create a full-stack Web3 application with deposit and withdrawal functionality.
