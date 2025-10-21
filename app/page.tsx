@@ -2,11 +2,13 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { useToast } from "@/lib/toast";
 
 export default function Home() {
   const router = useRouter();
   const [isConnecting, setIsConnecting] = useState(false);
   const [freighterDetected, setFreighterDetected] = useState<boolean | null>(null);
+  const toast = useToast();
 
   useEffect(() => {
     // Check if Freighter is installed with retry logic
@@ -53,23 +55,22 @@ export default function Home() {
       if (checkFreighter()) {
         const publicKey = await (window as any).freighter.getPublicKey();
         console.log("Connected:", publicKey);
+        toast("Wallet connected!", "success");
         router.push("/main");
       } else {
-        alert(
-          "Freighter wallet extension not detected.\n\n" +
-          "Please:\n" +
-          "1. Install Freighter from https://www.freighter.app/\n" +
-          "2. Refresh this page after installation\n" +
-          "3. Make sure the extension is enabled"
+        toast(
+          "Freighter not detected. Install the extension and refresh.",
+          "error"
         );
       }
     } catch (error: any) {
       console.error("Connection error:", error);
-      if (error.message?.includes("User declined access")) {
-        alert("You declined wallet access. Please try again.");
-      } else {
-        alert("Failed to connect wallet. Please try again.");
-      }
+      toast(
+        error.message?.includes("User declined")
+          ? "You declined wallet access."
+          : "Failed to connect wallet.",
+        "error"
+      );
     } finally {
       setIsConnecting(false);
     }

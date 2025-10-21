@@ -3,6 +3,9 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getBalance, deposit, withdraw } from "@/lib/stellar";
+import { getRecentPayments } from "@/lib/history";
+import { getConfig, setConfigPartial } from "@/lib/config";
+import { useToast } from "@/lib/toast";
 
 export default function MainPage() {
   const router = useRouter();
@@ -11,6 +14,9 @@ export default function MainPage() {
   const [amount, setAmount] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>("");
+  const [payments, setPayments] = useState<any[]>([]);
+  const [cfg, setCfg] = useState(getConfig());
+  const toast = useToast();
 
   useEffect(() => {
     checkWallet();
@@ -35,6 +41,8 @@ export default function MainPage() {
     try {
       const bal = await getBalance(key);
       setBalance(bal);
+      const p = await getRecentPayments(key, 5);
+      setPayments(p);
     } catch (error) {
       console.error("Balance fetch error:", error);
       setError("Failed to fetch balance");
@@ -50,10 +58,10 @@ export default function MainPage() {
     setIsLoading(true);
     setError("");
     try {
-      await deposit(publicKey, amount);
+  await deposit(publicKey, amount);
       await loadBalance(publicKey);
       setAmount("");
-      alert("Deposit successful!");
+  toast("Deposit successful!", "success");
     } catch (error: any) {
       console.error("Deposit error:", error);
       setError(error.message || "Deposit failed");
@@ -71,10 +79,10 @@ export default function MainPage() {
     setIsLoading(true);
     setError("");
     try {
-      await withdraw(publicKey, amount);
+  await withdraw(publicKey, amount);
       await loadBalance(publicKey);
       setAmount("");
-      alert("Withdrawal successful!");
+  toast("Withdrawal successful!", "success");
     } catch (error: any) {
       console.error("Withdraw error:", error);
       setError(error.message || "Withdrawal failed");
@@ -156,8 +164,50 @@ export default function MainPage() {
             </button>
           </div>
 
-          <div className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
-            <p>Network: {process.env.NEXT_PUBLIC_NETWORK}</p>
+          <div className="mt-6 text-sm text-gray-600 dark:text-gray-400">
+            <p className="mb-2 text-center">Network: {cfg.network}</p>
+
+            <details className="mb-4">
+              <summary className="cursor-pointer">Payments (last 5)</summary>
+              <ul className="mt-2 space-y-2">
+                {payments.length === 0 && <li>No recent payments</li>}
+                {payments.map((p) => (
+                  <li key={p.id} className="p-2 border rounded dark:border-gray-700">
+                    <div className="font-mono text-xs break-all">{p.amount} {p.asset}</div>
+                    <div className="text-xs">from {p.from.slice(0,6)}… to {p.to.slice(0,6)}…</div>
+                    <div className="text-xs opacity-70">{new Date(p.createdAt).toLocaleString()}</div>
+                  </li>
+                ))}
+              </ul>
+            </details>
+
+            <details>
+              <summary className="cursor-pointer">Settings</summary>
+              <div className="mt-2 space-y-2">
+                <div>
+                  <label className="block text-xs">Contract ID</label>
+                  <input
+                    defaultValue={cfg.contractId}
+                    onBlur={(e) => {
+                      setConfigPartial({ contractId: e.target.value });
+                      setCfg(getConfig());
+                    }}
+                    className="w-full px-2 py-1 border rounded text-xs dark:bg-gray-700 dark:border-gray-600"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs">RPC URL</label>
+                  <input
+                    defaultValue={cfg.rpcUrl}
+                    onBlur={(e) => {
+                      setConfigPartial({ rpcUrl: e.target.value });
+                      setCfg(getConfig());
+                    }}
+                    className="w-full px-2 py-1 border rounded text-xs dark:bg-gray-700 dark:border-gray-600"
+                  />
+                </div>
+              </div>
+            </details>
           </div>
         </div>
       </div>

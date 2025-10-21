@@ -1,32 +1,33 @@
 import * as StellarSdk from "@stellar/stellar-sdk";
+import { getConfig } from "./config";
 
-const CONTRACT_ID = process.env.NEXT_PUBLIC_CONTRACT_ID!;
-const NETWORK = process.env.NEXT_PUBLIC_NETWORK || "TESTNET";
-const RPC_URL =
-  process.env.NEXT_PUBLIC_RPC_URL || "https://soroban-testnet.stellar.org";
+function getServer() {
+  const cfg = getConfig();
+  return new StellarSdk.SorobanRpc.Server(cfg.rpcUrl);
+}
 
-// Initialize Stellar Server
-const server = new StellarSdk.SorobanRpc.Server(RPC_URL);
-
-// Network passphrase
-const networkPassphrase =
-  NETWORK === "TESTNET"
+function getNetworkPassphrase() {
+  const cfg = getConfig();
+  return cfg.network === "TESTNET"
     ? StellarSdk.Networks.TESTNET
     : StellarSdk.Networks.PUBLIC;
+}
 
 /**
  * Get balance for a user from the contract
  */
 export async function getBalance(publicKey: string): Promise<string> {
   try {
-    const contract = new StellarSdk.Contract(CONTRACT_ID);
+    const { contractId } = getConfig();
+    const contract = new StellarSdk.Contract(contractId);
+    const server = getServer();
     
     // Build the transaction to call get_balance
     const account = await server.getAccount(publicKey);
     
     const builtTransaction = new StellarSdk.TransactionBuilder(account, {
       fee: StellarSdk.BASE_FEE,
-      networkPassphrase,
+      networkPassphrase: getNetworkPassphrase(),
     })
       .addOperation(
         contract.call(
@@ -61,7 +62,9 @@ export async function getBalance(publicKey: string): Promise<string> {
  */
 export async function deposit(publicKey: string, amount: string): Promise<void> {
   try {
-    const contract = new StellarSdk.Contract(CONTRACT_ID);
+    const { contractId } = getConfig();
+    const contract = new StellarSdk.Contract(contractId);
+    const server = getServer();
     const amountStroops = BigInt(Math.floor(parseFloat(amount) * 10_000_000));
 
     // Get account
@@ -70,7 +73,7 @@ export async function deposit(publicKey: string, amount: string): Promise<void> 
     // Build transaction
     let transaction = new StellarSdk.TransactionBuilder(account, {
       fee: StellarSdk.BASE_FEE,
-      networkPassphrase,
+      networkPassphrase: getNetworkPassphrase(),
     })
       .addOperation(
         contract.call(
@@ -98,17 +101,17 @@ export async function deposit(publicKey: string, amount: string): Promise<void> 
     const { signedTxXdr } = await (window as any).freighter.signTransaction(
       transaction.toXDR(),
       {
-        network: NETWORK,
-        networkPassphrase,
+        network: getConfig().network,
+        networkPassphrase: getNetworkPassphrase(),
       }
     );
 
     // Submit transaction
     const signedTransaction = StellarSdk.TransactionBuilder.fromXDR(
       signedTxXdr,
-      networkPassphrase
+      getNetworkPassphrase()
     );
-    const response = await server.sendTransaction(signedTransaction);
+    const response = await getServer().sendTransaction(signedTransaction);
 
     // Wait for confirmation
     let status = await server.getTransaction(response.hash);
@@ -136,7 +139,9 @@ export async function withdraw(
   amount: string
 ): Promise<void> {
   try {
-    const contract = new StellarSdk.Contract(CONTRACT_ID);
+    const { contractId } = getConfig();
+    const contract = new StellarSdk.Contract(contractId);
+    const server = getServer();
     const amountStroops = BigInt(Math.floor(parseFloat(amount) * 10_000_000));
 
     // Get account
@@ -145,7 +150,7 @@ export async function withdraw(
     // Build transaction
     let transaction = new StellarSdk.TransactionBuilder(account, {
       fee: StellarSdk.BASE_FEE,
-      networkPassphrase,
+      networkPassphrase: getNetworkPassphrase(),
     })
       .addOperation(
         contract.call(
@@ -173,17 +178,17 @@ export async function withdraw(
     const { signedTxXdr } = await (window as any).freighter.signTransaction(
       transaction.toXDR(),
       {
-        network: NETWORK,
-        networkPassphrase,
+        network: getConfig().network,
+        networkPassphrase: getNetworkPassphrase(),
       }
     );
 
     // Submit transaction
     const signedTransaction = StellarSdk.TransactionBuilder.fromXDR(
       signedTxXdr,
-      networkPassphrase
+      getNetworkPassphrase()
     );
-    const response = await server.sendTransaction(signedTransaction);
+    const response = await getServer().sendTransaction(signedTransaction);
 
     // Wait for confirmation
     let status = await server.getTransaction(response.hash);

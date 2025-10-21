@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { ToastProvider } from "@/lib/toast";
 
 export const metadata: Metadata = {
   title: "MicroWallet - Stellar Soroban DApp",
@@ -14,7 +15,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="antialiased" suppressHydrationWarning>
-        {children}
+        <ToastProvider>{children}</ToastProvider>
       </body>
     </html>
   );
